@@ -24,3 +24,62 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ---- Public menu polish ------------------------------------------------ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scroll-reveal: hidden until the IntersectionObserver marks it visible. */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.4s ease-out,
+    transform 0.4s ease-out;
+}
+
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Lightbox enter animation (fade + slight scale). */
+.lightbox-backdrop {
+  animation: lightbox-fade 0.2s ease-out;
+}
+
+.lightbox-panel {
+  animation: lightbox-pop 0.25s ease-out;
+}
+
+@keyframes lightbox-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes lightbox-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .lightbox-backdrop,
+  .lightbox-panel {
+    animation: none;
+  }
+}
