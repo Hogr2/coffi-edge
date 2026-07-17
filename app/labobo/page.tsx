@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase";
 import AddItemForm from "./AddItemForm";
 import ItemImageUpload from "./ItemImageUpload";
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./messages";
 import {
   addCategory,
   addPrice,
@@ -58,6 +59,9 @@ export default async function LaboboPage({
 }) {
   const authed = await getSession();
   const { error, m, e } = await searchParams;
+  // Resolve banner KEYS through the catalog — URL text is never rendered.
+  const successMessage = m ? SUCCESS_MESSAGES[m] : undefined;
+  const errorMessage = e ? ERROR_MESSAGES[e] : undefined;
 
   if (!authed) {
     return (
@@ -136,14 +140,14 @@ export default async function LaboboPage({
           </form>
         </header>
 
-        {m && (
+        {successMessage && (
           <p className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-            {m}
+            {successMessage}
           </p>
         )}
-        {e && (
+        {errorMessage && (
           <p className="mb-4 rounded-xl border border-[#e5b8ae] bg-[#faeeeb] px-4 py-3 text-sm text-[#9c3d2e]">
-            {e}
+            {errorMessage}
           </p>
         )}
 

@@ -1,6 +1,6 @@
 import "server-only";
 import crypto from "crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 const COOKIE_NAME = "session";
@@ -24,8 +24,42 @@ function safeEqual(a: string, b: string): boolean {
   return crypto.timingSafeEqual(ha, hb);
 }
 
+// Brute-force protection: a fixed delay on every failure plus a sliding-window
+// lockout per IP (in-memory — resets on server restart, which is fine here).
+const FAILURE_WINDOW_MS = 15 * 60 * 1000;
+const MAX_FAILURES_PER_WINDOW = 10;
+const FAILURE_DELAY_MS = 1000;
+const failedAttempts = new Map<string, number[]>();
+
+async function clientIp(): Promise<string> {
+  const requestHeaders = await headers();
+  return (
+    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() || "local"
+  );
+}
+
 export async function login(password: string): Promise<boolean> {
-  if (!safeEqual(password, process.env.APP_PASSWORD!)) return false;
+  const expected = process.env.APP_PASSWORD;
+  if (!expected || !process.env.SESSION_SECRET) return false;
+
+  const ip = await clientIp();
+  const now = Date.now();
+  const recentFailures = (failedAttempts.get(ip) ?? []).filter(
+    (time) => now - time < FAILURE_WINDOW_MS
+  );
+
+  if (recentFailures.length >= MAX_FAILURES_PER_WINDOW) {
+    await new Promise((resolve) => setTimeout(resolve, FAILURE_DELAY_MS));
+    return false;
+  }
+
+  if (!safeEqual(password, expected)) {
+    recentFailures.push(now);
+    failedAttempts.set(ip, recentFailures);
+    await new Promise((resolve) => setTimeout(resolve, FAILURE_DELAY_MS));
+    return false;
+  }
+  failedAttempts.delete(ip);
 
   // All session timestamps are Unix/UTC only — never local timezone.
   const payload = Buffer.from(
@@ -44,6 +78,7 @@ export async function login(password: string): Promise<boolean> {
 }
 
 export async function getSession(): Promise<boolean> {
+  if (!process.env.SESSION_SECRET) return false;
   const token = (await cookies()).get(COOKIE_NAME)?.value;
   if (!token) return false;
 
