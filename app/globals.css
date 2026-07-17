@@ -67,19 +67,11 @@ html {
   }
 }
 
+/* Motion policy: gentle animations (reveal fade-in, lightbox pop) play for
+   everyone; only strong motion (smooth-scroll, hover-lift via motion-safe:)
+   respects reduced-motion. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .lightbox-backdrop,
-  .lightbox-panel {
-    animation: none;
   }
 }

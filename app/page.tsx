@@ -157,11 +157,15 @@ export default async function MenuPage() {
 
                   return (
                     <Reveal key={item.id} delay={(index % 6) * 60}>
-                      <article
-                        className={`overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#eee7da] motion-safe:transition-[transform,box-shadow] motion-safe:hover:-translate-y-1 hover:shadow-md ${
-                          item.is_available ? "" : "opacity-60"
-                        }`}
-                      >
+                      {/* Cards are deliberately static: any hover transition here
+                          (shadow or transform) repaints the images and flickers
+                          on this hardware — see spec #016. */}
+                      <div>
+                        <article
+                          className={`overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#eee7da] ${
+                            item.is_available ? "" : "opacity-60"
+                          }`}
+                        >
                         <ItemImage
                           letter={item.name_ar.trim().charAt(0)}
                           nameAr={item.name_ar}
@@ -204,7 +208,8 @@ export default async function MenuPage() {
                             )}
                           </div>
                         </div>
-                      </article>
+                        </article>
+                      </div>
                     </Reveal>
                   );
                 })}

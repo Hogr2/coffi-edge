@@ -51,6 +51,7 @@ export default function ItemImage({
           src={imageUrl}
           alt={nameAr}
           fill
+          priority
           sizes={
             big
               ? "min(90vw, 384px)"

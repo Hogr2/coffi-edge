@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 
 // Fade+rise wrapper: reveals its (server-rendered) children once when they
-// first enter the viewport. Reduced-motion users see content instantly — the
-// CSS in globals.css disables the hidden state entirely for them.
+// first enter the viewport. This gentle fade plays for everyone, including
+// reduced-motion users (only strong motion is gated — see globals.css).
 export default function Reveal({
   children,
   delay = 0,
@@ -21,10 +21,7 @@ export default function Reveal({
     const element = ref.current;
     if (!element) return;
 
-    if (
-      typeof IntersectionObserver === "undefined" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (typeof IntersectionObserver === "undefined") {
       setVisible(true);
       return;
     }
