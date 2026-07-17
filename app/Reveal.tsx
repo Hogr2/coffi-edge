@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Fade+rise wrapper: reveals its (server-rendered) children once when they
-// first enter the viewport. This gentle fade plays for everyone, including
-// reduced-motion users (only strong motion is gated — see globals.css).
+// Fade+rise wrapper: fades its (server-rendered) children in when they enter
+// the viewport and back out when they leave, every time. This gentle fade
+// plays for everyone, including reduced-motion users (only strong motion is
+// gated — see globals.css).
 export default function Reveal({
   children,
   delay = 0,
@@ -28,12 +29,9 @@ export default function Reveal({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setVisible(true);
-          observer.disconnect();
-        }
+        for (const entry of entries) setVisible(entry.isIntersecting);
       },
-      { rootMargin: "0px 0px -10% 0px" }
+      { rootMargin: "0px 0px -8% 0px" }
     );
     observer.observe(element);
     return () => observer.disconnect();

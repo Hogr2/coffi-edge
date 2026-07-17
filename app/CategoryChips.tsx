@@ -54,8 +54,8 @@ export default function CategoryChips({
               href={`#cat-${category.id}`}
               className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium shadow-sm motion-safe:transition-colors ${
                 active
-                  ? "border-[#7a4a24] bg-[#7a4a24] text-[#F9F7F2]"
-                  : "border-[#e7dcc9] bg-white text-[#7a4a24] hover:bg-[#f3ead9] active:scale-95"
+                  ? "border-[#2b2018] bg-[#2b2018] text-white"
+                  : "border-[#e7dcc9] bg-white text-[#2b2018] hover:bg-[#f3ead9] active:scale-95"
               }`}
             >
               {category.name_ar}

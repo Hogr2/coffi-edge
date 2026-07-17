@@ -2,29 +2,53 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type PriceLine = { label: string | null; value: string };
 
+const LABELS = {
+  ar: {
+    new: "جديد",
+    unavailable: "غير متوفّر",
+    unavailableNow: "غير متوفّر حالياً",
+    view: "عرض",
+    close: "إغلاق",
+  },
+  en: {
+    new: "New",
+    unavailable: "Unavailable",
+    unavailableNow: "Currently unavailable",
+    view: "View",
+    close: "Close",
+  },
+} as const;
+
 // The item card's image slot + lightbox. Shows the real photo when
-// image_url exists, otherwise the elegant gradient placeholder.
+// image_url exists, otherwise a colorful per-category placeholder
+// (gradient + icon + the item's first word — the Edge look).
 export default function ItemImage({
-  letter,
-  nameAr,
-  nameEn,
+  placeholder,
+  label,
+  namePrimary,
+  nameSecondary,
+  lang,
   imageUrl,
   priceLines,
   isNew,
   unavailable,
 }: {
-  letter: string;
-  nameAr: string;
-  nameEn: string;
+  placeholder: { from: string; to: string; icon: string };
+  label: string;
+  namePrimary: string;
+  nameSecondary: string;
+  lang: "ar" | "en";
   imageUrl: string | null;
   priceLines: PriceLine[];
   isNew: boolean;
   unavailable: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const t = LABELS[lang];
 
   useEffect(() => {
     if (!open) return;
@@ -42,14 +66,19 @@ export default function ItemImage({
 
   const imageArea = (big: boolean) => (
     <div
-      className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#f3ead9] to-[#e0cbab] ${
+      style={
+        imageUrl
+          ? undefined
+          : { background: `linear-gradient(135deg, ${placeholder.from}, ${placeholder.to})` }
+      }
+      className={`relative flex flex-col items-center justify-center overflow-hidden ${
         big ? "aspect-[4/3] rounded-xl" : "aspect-[5/4] sm:aspect-[4/3]"
       }`}
     >
       {imageUrl ? (
         <Image
           src={imageUrl}
-          alt={nameAr}
+          alt={namePrimary}
           fill
           priority
           sizes={
@@ -60,14 +89,22 @@ export default function ItemImage({
           className="object-cover"
         />
       ) : (
-        <span
-          aria-hidden
-          className={`select-none font-extrabold text-[#7a4a24]/25 ${
-            big ? "text-8xl" : "text-5xl"
-          }`}
-        >
-          {letter}
-        </span>
+        <>
+          <span
+            aria-hidden
+            className={`select-none drop-shadow-md ${big ? "text-8xl" : "text-6xl"}`}
+          >
+            {placeholder.icon}
+          </span>
+          <span
+            aria-hidden
+            className={`mt-2 select-none font-bold text-white/95 [text-shadow:0_1px_4px_rgba(0,0,0,0.35)] ${
+              big ? "text-lg" : "text-sm"
+            }`}
+          >
+            {label}
+          </span>
+        </>
       )}
     </div>
   );
@@ -77,41 +114,44 @@ export default function ItemImage({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`عرض ${nameAr}`}
-        className="relative block w-full cursor-pointer text-right"
+        aria-label={`${t.view} ${namePrimary}`}
+        className="relative block w-full cursor-pointer"
       >
         {imageArea(false)}
         {isNew && (
           <span className="absolute start-2 top-2 rounded-full bg-[#7a4a24] px-2.5 py-0.5 text-xs font-medium text-[#F9F7F2] shadow">
-            جديد
+            {t.new}
           </span>
         )}
         {unavailable && (
           <span className="absolute inset-0 flex items-center justify-center">
             <span className="rounded-full bg-[#2b2018]/80 px-3 py-1 text-xs font-medium text-[#F9F7F2]">
-              غير متوفّر
+              {t.unavailable}
             </span>
           </span>
         )}
       </button>
 
-      {open && (
+      {/* Portal: the card has will-change-transform, which would trap a fixed
+          overlay inside it — the modal must live directly under <body>. */}
+      {open &&
+        createPortal(
         <div
           onClick={() => setOpen(false)}
           className="lightbox-backdrop fixed inset-0 z-50 flex items-center justify-center bg-[#2b2018]/60 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
-          aria-label={nameAr}
+          aria-label={namePrimary}
         >
           <div
             onClick={(event) => event.stopPropagation()}
-            dir="rtl"
+            dir={lang === "ar" ? "rtl" : "ltr"}
             className="lightbox-panel relative w-full max-w-sm rounded-2xl bg-[#F9F7F2] p-4 shadow-xl"
           >
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="إغلاق"
+              aria-label={t.close}
               className="absolute end-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-[#2b2018]/10 text-lg text-[#2b2018] hover:bg-[#2b2018]/20"
             >
               ✕
@@ -120,11 +160,11 @@ export default function ItemImage({
             {imageArea(true)}
 
             <div className="mt-4 text-center">
-              <h3 className="text-xl font-bold text-[#2b2018]">{nameAr}</h3>
-              <p className="mt-0.5 text-sm text-[#a08b76]">{nameEn}</p>
+              <h3 className="text-xl font-bold text-[#2b2018]">{namePrimary}</h3>
+              <p className="mt-0.5 text-sm text-[#a08b76]">{nameSecondary}</p>
               {unavailable && (
                 <p className="mt-2 text-sm font-medium text-[#7a4a24]">
-                  غير متوفّر حالياً
+                  {t.unavailableNow}
                 </p>
               )}
               <ul className="mt-3 flex flex-col gap-1">
@@ -144,7 +184,8 @@ export default function ItemImage({
               </ul>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
