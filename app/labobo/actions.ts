@@ -33,6 +33,31 @@ function intField(formData: FormData, name: string): number {
   return n;
 }
 
+// The browser compresses to WebP before sending; this cap is a server-side
+// backstop (the bucket itself allows up to ~10MB).
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/webp", "image/jpeg", "image/png"]);
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/webp": "webp",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+};
+
+// Uploads a validated image to the public menu-images bucket and returns its
+// public URL, or null on any failure. Callers handle the user-facing error.
+async function uploadImageFile(file: File): Promise<string | null> {
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) return null;
+  if (file.size === 0 || file.size > MAX_UPLOAD_BYTES) return null;
+
+  const supabase = createServiceClient();
+  const path = `items/${crypto.randomUUID()}-${Date.now()}.${IMAGE_EXTENSIONS[file.type]}`;
+  const { error } = await supabase.storage
+    .from("menu-images")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) return null;
+  return supabase.storage.from("menu-images").getPublicUrl(path).data.publicUrl;
+}
+
 // ---------------------------------------------------------------------------
 // Auth
 // ---------------------------------------------------------------------------
@@ -111,13 +136,21 @@ export async function addItem(formData: FormData): Promise<void> {
   const category_id = text(formData, "category_id");
   const name_ar = text(formData, "name_ar");
   const name_en = text(formData, "name_en");
-  const image_url = text(formData, "image_url") || null;
+  let image_url = text(formData, "image_url") || null;
   const is_available = formData.get("is_available") === "on";
   const is_new = formData.get("is_new") === "on";
   const sort_order = intField(formData, "sort_order");
 
   if (!category_id) fail("اختاروا تصنيفاً.");
   if (!name_ar || !name_en) fail("اسم الصنف مطلوب بالعربية والإنجليزية.");
+
+  // An uploaded (browser-compressed) file takes precedence over a pasted URL.
+  const imageFile = formData.get("image_file");
+  if (imageFile instanceof File && imageFile.size > 0) {
+    const uploadedUrl = await uploadImageFile(imageFile);
+    if (!uploadedUrl) fail("تعذّر رفع الصورة.");
+    image_url = uploadedUrl;
+  }
 
   // Parse the aligned price-row arrays; skip rows with an empty price.
   const labelsAr = formData.getAll("price_size_ar").map(String);
@@ -236,6 +269,42 @@ export async function deletePrice(formData: FormData): Promise<void> {
   const { error } = await createServiceClient().from("prices").delete().eq("id", id);
   if (error) fail("تعذّر حذف السعر.");
   ok("تم حذف السعر.");
+}
+
+// ---------------------------------------------------------------------------
+// Item images
+// ---------------------------------------------------------------------------
+
+export async function uploadItemImage(formData: FormData): Promise<void> {
+  await requireAuth();
+  const item_id = text(formData, "item_id");
+  const file = formData.get("image_file");
+  if (!item_id) fail("طلب غير صالح.");
+  if (!(file instanceof File) || file.size === 0) fail("اختاروا صورة أولاً.");
+
+  const url = await uploadImageFile(file);
+  if (!url) fail("تعذّر رفع الصورة.");
+
+  const { error } = await createServiceClient()
+    .from("items")
+    .update({ image_url: url })
+    .eq("id", item_id);
+  if (error) fail("تعذّر حفظ الصورة.");
+  ok("تم تحديث صورة الصنف.");
+}
+
+export async function removeItemImage(formData: FormData): Promise<void> {
+  await requireAuth();
+  const id = text(formData, "id");
+  if (!id) fail("طلب غير صالح.");
+
+  // Clearing the DB reference is enough; the storage object may remain.
+  const { error } = await createServiceClient()
+    .from("items")
+    .update({ image_url: null })
+    .eq("id", id);
+  if (error) fail("تعذّر إزالة الصورة.");
+  ok("تمت إزالة صورة الصنف.");
 }
 
 // ---------------------------------------------------------------------------

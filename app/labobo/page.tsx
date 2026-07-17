@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase";
 import AddItemForm from "./AddItemForm";
+import ItemImageUpload from "./ItemImageUpload";
 import {
   addCategory,
   addPrice,
@@ -323,6 +324,13 @@ export default async function LaboboPage({
                         </div>
 
                         <details className="mt-3">
+                          <summary className={summaryClass}>
+                            {item.image_url ? "الصورة (موجودة)" : "الصورة"}
+                          </summary>
+                          <ItemImageUpload itemId={item.id} imageUrl={item.image_url} />
+                        </details>
+
+                        <details className="mt-2">
                           <summary className={summaryClass}>إضافة حجم/سعر</summary>
                           <form
                             action={addPrice}

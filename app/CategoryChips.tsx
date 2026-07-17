@@ -42,7 +42,10 @@ export default function CategoryChips({
 
   return (
     <nav className="sticky top-0 z-10 border-b border-[#eee7da] bg-[#F9F7F2]/95 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-3xl gap-2 overflow-x-auto px-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* w-max + mx-auto: the group sits centered when it fits, and falls back
+          to horizontal scrolling when it overflows on narrow screens. */}
+      <div className="overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mx-auto flex w-max gap-2 px-4">
         {categories.map((category) => {
           const active = category.id === activeId;
           return (
@@ -59,6 +62,7 @@ export default function CategoryChips({
             </a>
           );
         })}
+        </div>
       </div>
     </nav>
   );

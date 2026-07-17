@@ -1,16 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type PriceLine = { label: string | null; value: string };
 
-// The item card's image slot + lightbox. Shows the reserved gradient
-// placeholder for now; when real images land, swap the placeholder block for
-// the photo (both in the card and inside the modal) — nothing else changes.
+// The item card's image slot + lightbox. Shows the real photo when
+// image_url exists, otherwise the elegant gradient placeholder.
 export default function ItemImage({
   letter,
   nameAr,
   nameEn,
+  imageUrl,
   priceLines,
   isNew,
   unavailable,
@@ -18,6 +19,7 @@ export default function ItemImage({
   letter: string;
   nameAr: string;
   nameEn: string;
+  imageUrl: string | null;
   priceLines: PriceLine[];
   isNew: boolean;
   unavailable: boolean;
@@ -38,20 +40,34 @@ export default function ItemImage({
     };
   }, [open]);
 
-  const placeholder = (big: boolean) => (
+  const imageArea = (big: boolean) => (
     <div
-      className={`relative flex items-center justify-center bg-gradient-to-br from-[#f3ead9] to-[#e0cbab] ${
-        big ? "aspect-[4/3] rounded-xl" : "aspect-[4/3]"
+      className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#f3ead9] to-[#e0cbab] ${
+        big ? "aspect-[4/3] rounded-xl" : "aspect-[5/4] sm:aspect-[4/3]"
       }`}
     >
-      <span
-        aria-hidden
-        className={`select-none font-extrabold text-[#7a4a24]/25 ${
-          big ? "text-8xl" : "text-5xl"
-        }`}
-      >
-        {letter}
-      </span>
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt={nameAr}
+          fill
+          sizes={
+            big
+              ? "min(90vw, 384px)"
+              : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          }
+          className="object-cover"
+        />
+      ) : (
+        <span
+          aria-hidden
+          className={`select-none font-extrabold text-[#7a4a24]/25 ${
+            big ? "text-8xl" : "text-5xl"
+          }`}
+        >
+          {letter}
+        </span>
+      )}
     </div>
   );
 
@@ -63,7 +79,7 @@ export default function ItemImage({
         aria-label={`عرض ${nameAr}`}
         className="relative block w-full cursor-pointer text-right"
       >
-        {placeholder(false)}
+        {imageArea(false)}
         {isNew && (
           <span className="absolute start-2 top-2 rounded-full bg-[#7a4a24] px-2.5 py-0.5 text-xs font-medium text-[#F9F7F2] shadow">
             جديد
@@ -100,7 +116,7 @@ export default function ItemImage({
               ✕
             </button>
 
-            {placeholder(true)}
+            {imageArea(true)}
 
             <div className="mt-4 text-center">
               <h3 className="text-xl font-bold text-[#2b2018]">{nameAr}</h3>

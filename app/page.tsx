@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { createServiceClient } from "@/lib/supabase";
 import CategoryChips from "./CategoryChips";
 import ItemImage from "./ItemImage";
@@ -76,25 +77,41 @@ export default async function MenuPage() {
   return (
     <div dir="rtl" lang="ar" className="min-h-screen bg-[#F9F7F2] text-[#2b2018]">
       {/* ------------------------------- Hero ---------------------------- */}
-      <header className="bg-gradient-to-b from-[#e9dcc3] via-[#f3ead9] to-[#F9F7F2] px-4 pb-12 pt-16 text-center">
-        <p className="text-sm font-medium tracking-[0.3em] text-[#8a7460]">
-          EDGE CAFE
-        </p>
-        <h1 className="mt-2 text-4xl font-extrabold text-[#2b2018] sm:text-5xl">
-          إيدج كافيه
-        </h1>
-        <p className="mt-4 text-lg text-[#7a4a24]">
-          قهوة مختصّة وأجواء تناسب يومك
-        </p>
-        <p className="mt-1 text-sm text-[#8a7460]">يومياً 7:00 ص — 1:00 ص</p>
-        {firstCategoryId && (
-          <a
-            href={`#cat-${firstCategoryId}`}
-            className="mt-7 inline-block rounded-full bg-[#7a4a24] px-8 py-2.5 font-medium text-[#F9F7F2] shadow-md motion-safe:transition-transform hover:bg-[#63391a] motion-safe:hover:-translate-y-0.5 active:translate-y-0"
-          >
-            عرض القائمة
-          </a>
-        )}
+      <header className="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-4 py-16 text-center sm:min-h-[55vh]">
+        <Image
+          src="/hero.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+        {/* Scrim: keeps the text legible over any part of the photo,
+            strongest toward the bottom. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2b2018]/40 via-[#2b2018]/50 to-[#2b2018]/80" />
+
+        <div className="relative">
+          <p className="text-sm font-medium tracking-[0.3em] text-[#e8dcc8]">
+            EDGE CAFE
+          </p>
+          <h1 className="mt-2 text-4xl font-extrabold text-[#F9F7F2] [text-shadow:0_2px_12px_rgba(0,0,0,0.45)] sm:text-5xl">
+            إيدج كافيه
+          </h1>
+          <p className="mt-4 text-lg text-[#f3ead9] [text-shadow:0_1px_8px_rgba(0,0,0,0.5)]">
+            قهوة مختصّة وأجواء تناسب يومك
+          </p>
+          <p className="mt-1 text-sm text-[#e8dcc8] [text-shadow:0_1px_8px_rgba(0,0,0,0.5)]">
+            يومياً 7:00 ص — 1:00 ص
+          </p>
+          {firstCategoryId && (
+            <a
+              href={`#cat-${firstCategoryId}`}
+              className="mt-7 inline-block rounded-full bg-[#F9F7F2] px-8 py-2.5 font-semibold text-[#7a4a24] shadow-lg motion-safe:transition-transform hover:bg-[#f3ead9] motion-safe:hover:-translate-y-0.5 active:translate-y-0"
+            >
+              عرض القائمة
+            </a>
+          )}
+        </div>
       </header>
 
       {/* ----------------------- Sticky category chips ------------------- */}
@@ -113,18 +130,22 @@ export default async function MenuPage() {
               id={`cat-${category.id}`}
               className="mb-12 scroll-mt-20"
             >
-              <Reveal className="mb-4">
-                <div className="flex items-baseline gap-3">
-                  <h2 className="text-2xl font-bold text-[#7a4a24]">
+              <Reveal className="mb-6">
+                <div className="text-center">
+                  <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#a08b76]">
+                    {category.name_en}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-bold text-[#7a4a24] sm:text-3xl">
                     {category.name_ar}
                   </h2>
-                  <span className="text-sm text-[#a08b76]">
-                    {category.name_en}
-                  </span>
+                  <span
+                    aria-hidden
+                    className="mx-auto mt-3 block h-0.5 w-12 rounded-full bg-[#7a4a24]/60"
+                  />
                 </div>
               </Reveal>
 
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {categoryItems.map((item, index) => {
                   const itemPrices = pricesByItem.get(item.id) ?? [];
                   const singlePrice =
@@ -145,6 +166,7 @@ export default async function MenuPage() {
                           letter={item.name_ar.trim().charAt(0)}
                           nameAr={item.name_ar}
                           nameEn={item.name_en}
+                          imageUrl={item.image_url}
                           priceLines={priceLines}
                           isNew={item.is_new}
                           unavailable={!item.is_available}
