@@ -198,9 +198,12 @@ export default async function MenuPage({
             height={100}
             priority
             style={{ height: "auto" }}
-            className="mx-auto mb-7 w-28 sm:w-32"
+            className="hero-in mx-auto mb-7 w-28 sm:w-32"
           />
-          <p className="flex items-center justify-center gap-3 text-xs font-medium tracking-[0.2em] text-[#8a7460]">
+          <p
+            className="hero-in flex items-center justify-center gap-3 text-xs font-medium tracking-[0.2em] text-[#8a7460]"
+            style={{ animationDelay: "120ms" }}
+          >
             <span aria-hidden className="h-px w-10 bg-[#8a7460]/40" />
             {t.kicker}
             <span aria-hidden className="h-px w-10 bg-[#8a7460]/40" />
@@ -208,22 +211,41 @@ export default async function MenuPage({
           {/* The wordmark stays in English in both languages (brand) */}
           <h1
             dir="ltr"
-            style={{ fontFamily: "var(--font-poppins), sans-serif" }}
-            className="mt-3 text-5xl font-bold text-[#2b2018] [text-shadow:0_1px_2px_rgba(249,247,242,0.6)] sm:text-6xl"
+            style={{
+              fontFamily: "var(--font-poppins), sans-serif",
+              animationDelay: "240ms",
+            }}
+            className="hero-in mt-3 text-5xl font-bold text-[#2b2018] [text-shadow:0_1px_2px_rgba(249,247,242,0.6)] sm:text-6xl"
           >
             Edge Cafe
           </h1>
-          <p className="mt-5 text-lg text-[#5c4632]">{t.tagline}</p>
-          <p className="mt-2 text-sm text-[#8a7460]">{t.tagline2}</p>
+          <p
+            className="hero-in mt-5 text-lg text-[#5c4632]"
+            style={{ animationDelay: "360ms" }}
+          >
+            {t.tagline}
+          </p>
+          <p
+            className="hero-in mt-2 text-sm text-[#8a7460]"
+            style={{ animationDelay: "480ms" }}
+          >
+            {t.tagline2}
+          </p>
           {firstCategoryId && (
-            <a
-              href={`#cat-${firstCategoryId}`}
-              className="mt-8 inline-block rounded-full bg-white px-9 py-3 font-medium text-[#5c4632] shadow-md ring-1 ring-[#eee7da] motion-safe:transition-transform hover:bg-[#f3ead9] motion-safe:hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {t.viewMenu}
-            </a>
+            <div className="hero-in" style={{ animationDelay: "600ms" }}>
+              <a
+                href={`#cat-${firstCategoryId}`}
+                className="mt-8 inline-block rounded-full bg-white px-9 py-3 font-medium text-[#5c4632] shadow-md ring-1 ring-[#eee7da] motion-safe:transition-transform hover:bg-[#f3ead9] motion-safe:hover:-translate-y-0.5 active:translate-y-0"
+              >
+                {t.viewMenu}
+              </a>
+            </div>
           )}
-          <p dir="ltr" className="mt-8 text-xs tracking-widest text-[#8a7460]">
+          <p
+            dir="ltr"
+            className="hero-in mt-8 text-xs tracking-widest text-[#8a7460]"
+            style={{ animationDelay: "720ms" }}
+          >
             {t.hours}
           </p>
         </div>

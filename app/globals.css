@@ -31,6 +31,26 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Warm amber text selection (Edge look) instead of the browser's blue. */
+::selection {
+  background: #e0c184;
+  color: #2b2018;
+}
+
+/* Page-load entrance: hero elements fade+rise in a stagger on every full
+   load (first visit, refresh, language switch). Gentle motion — plays for
+   everyone, same policy as the reveal fade. */
+.hero-in {
+  animation: hero-in 0.7s ease-out both;
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
 /* Scroll-reveal: hidden until the IntersectionObserver marks it visible. */
 .reveal {
   opacity: 0;
